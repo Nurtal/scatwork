@@ -3,3 +3,7 @@
 ## Applications
 - segmentation ?
 - single cell ?
+
+## Segmentation
+- [x] display features
+- [ ] detect object
