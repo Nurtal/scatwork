@@ -7,12 +7,12 @@ from kymatio.torch import Scattering2D
 
 # 1. Chargement et prétraitement de l'image
 # Charger l'image et la convertir en niveaux de gris
-image_path = "/home/n765/Images/chu.png"
+image_path = "/home/n765/Images/radio.jpg"
 img = Image.open(image_path).convert('L')
 
 # Redimensionner l'image pour correspondre à la taille attendue par la scattering transform.
 # Ici, nous choisissons une taille de 128x128 pixels.
-img = img.resize((128, 128))
+img = img.resize((512, 512))
 
 # Conversion en tenseur PyTorch
 to_tensor = transforms.ToTensor()  # convertit l'image en tenseur de forme (1, H, W) pour une image en niveaux de gris
@@ -23,7 +23,7 @@ img_tensor = img_tensor.unsqueeze(0)  # forme finale : (1, 1, 128, 128)
 
 # 2. Application de la scattering transform
 # Pour une image de taille 128x128, on définit shape=(128,128) et choisit un nombre d'échelles, par exemple J=2.
-scattering = Scattering2D(J=2, shape=(128, 128))
+scattering = Scattering2D(J=1, shape=(512, 512))
 
 # Appliquer la scattering transform sur l'image
 features = scattering(img_tensor)  # forme : (1, C, H_out, W_out)
