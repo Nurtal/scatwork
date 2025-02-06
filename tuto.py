@@ -6,27 +6,6 @@ import numpy as np
 from sklearn.linear_model import LogisticRegression
 from sklearn.metrics import accuracy_score
 
-# Définition des transformations sur les images : conversion en tenseur
-transform = transforms.Compose([
-    transforms.ToTensor()
-])
-
-# Téléchargement des datasets MNIST (train et test)
-train_dataset = datasets.MNIST(root='./data', train=True, download=True, transform=transform)
-test_dataset  = datasets.MNIST(root='./data', train=False, download=True, transform=transform)
-
-# Création des DataLoader
-batch_size = 128
-train_loader = DataLoader(train_dataset, batch_size=batch_size, shuffle=False)
-test_loader  = DataLoader(test_dataset, batch_size=batch_size, shuffle=False)
-
-# Dimensions des images MNIST
-img_height, img_width = 28, 28
-image_shape = (img_height, img_width)
-
-# Initialisation de la scattering transform
-# Ici, J définit le nombre d'échelles. Pour MNIST, J=2 est un bon compromis.
-scattering = Scattering2D(J=2, shape=image_shape)
 
 def compute_scattering_features(loader):
     """
@@ -54,22 +33,44 @@ def compute_scattering_features(loader):
     labels = np.concatenate(labels_list, axis=0)
     return features, labels
 
-# Calcul des features pour les ensembles d'entraînement et de test
-print("Calcul des features scattering pour l'ensemble d'entraînement...")
-train_features, train_labels = compute_scattering_features(train_loader)
-print("Calcul des features scattering pour l'ensemble de test...")
-test_features, test_labels = compute_scattering_features(test_loader)
 
-# Affichage de la dimension des features extraites
-print("Dimension des features scattering :", train_features.shape[1])
+if __name__ == "__main__":
 
-# Classification avec une régression logistique
-print("Entraînement du classifieur...")
-clf = LogisticRegression(max_iter=1000, solver='lbfgs', multi_class='multinomial')
-clf.fit(train_features, train_labels)
+    # Définition des transformations sur les images : conversion en tenseur
+    transform = transforms.Compose([
+        transforms.ToTensor()
+    ])
 
-# Prédictions sur l'ensemble de test et évaluation de la précision
-predictions = clf.predict(test_features)
-accuracy = accuracy_score(test_labels, predictions)
-print(f"Précision sur l'ensemble de test : {accuracy:.4f}")
+    # download MNIST (train & test)
+    train_dataset = datasets.MNIST(root='./data', train=True, download=True, transform=transform)
+    test_dataset  = datasets.MNIST(root='./data', train=False, download=True, transform=transform)
+
+    # Création des DataLoader
+    batch_size = 128
+    train_loader = DataLoader(train_dataset, batch_size=batch_size, shuffle=False)
+    test_loader  = DataLoader(test_dataset, batch_size=batch_size, shuffle=False)
+
+    # set dimension images MNIST
+    img_height, img_width = 28, 28
+    image_shape = (img_height, img_width)
+
+    # Initialisation de la scattering transform
+    # Ici, J définit le nombre d'échelles. Pour MNIST, J=2 est un bon compromis (according to chatgpt).
+    scattering = Scattering2D(J=2, shape=image_shape)
+
+    # compute features
+    print("[+] Compute features")
+    train_features, train_labels = compute_scattering_features(train_loader)
+    test_features, test_labels = compute_scattering_features(test_loader)
+    print("[+] dimensions of features :", train_features.shape[1])
+
+    # Train classifier
+    print("[+] Training logistic regression ...")
+    clf = LogisticRegression(max_iter=1000, solver='lbfgs', multi_class='multinomial')
+    clf.fit(train_features, train_labels)
+
+    # Evaluate classifier
+    predictions = clf.predict(test_features)
+    accuracy = accuracy_score(test_labels, predictions)
+    print(f"[*] ACC : {accuracy:.4f}")
 
