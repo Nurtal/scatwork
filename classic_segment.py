@@ -127,7 +127,8 @@ def improved_segmentation(image_path, mask_path):
     avg_mask = np.mean(mask_list, axis=0)
     
     # Binarisation : si la valeur moyenne est supérieure ou égale au seuil, le pixel devient 255, sinon 0
-    binary_mask = (avg_mask >= 127).astype(np.uint8) * 255
+    treshold = 220
+    binary_mask = (avg_mask >= treshold).astype(np.uint8) * 255
 
     # Sauvegarder le masque
     cv2.imwrite(mask_path, binary_mask)
