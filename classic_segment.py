@@ -7,6 +7,7 @@ import matplotlib.pyplot as plt
 from PIL import Image
 from torchvision import transforms
 from kymatio.torch import Scattering2D
+import glob
 
 
 def watershed_segment(image_path, mask_path):
@@ -67,9 +68,18 @@ def improved_segmentation(image_path, mask_path):
 
     # parameters
     features_folder = "features"
+    mask_folder = "intermediate_masks"
 
     if not os.path.isdir(features_folder):
         os.mkdir(features_folder)
+    else:
+        for tf in glob.glob(f"{features_folder}/*.png"):
+            os.remove(tf)
+    if not os.path.isdir(mask_folder):
+        os.mkdir(mask_folder)
+    else:
+        for tf in glob.glob(f"{mask_folder}/*.png"):
+            os.remove(tf)
 
     #- SCAT PART---------------------------
     # preprocess image
@@ -99,22 +109,28 @@ def improved_segmentation(image_path, mask_path):
     print("Dimensions des features extraites :", features.shape)
     cmpt = 0
     for f in features[0]:
+
+        # save feature projection
         plt.imsave(f"{features_folder}/features_scattering_{cmpt}.png", f, cmap="viridis")
 
-        #- TODO SEGMENTATION ---------------------------
-        # Appliquer Watershed
-
-        # image_color = cv2.cvtColor(f, cv2.COLOR_BGR2RGB)  # Convertir pour affichage
-        # cv2.watershed(f, markers)
-        # image_color[markers == -1] = [255, 0, 0]  # Contours en rouge
-
-        # # Créer un masque final en noir et blanc
-        # mask = np.zeros_like(image_gray)
-        # mask[markers > 1] = 255  # Tous les pixels marqués comme objets
-        
+        # call watershed segmentation
+        watershed_segment(f"{features_folder}/features_scattering_{cmpt}.png", f"{mask_folder}/mask_watershed_from_feature_{cmpt}.png")
         cmpt +=1
 
+    # merge mask
+    mask_list = []
+    for m in glob.glob(f"{mask_folder}/*.png"):
+        mask = cv2.imread(m)
+        mask_list.append(mask)
 
+    # Calcul de la moyenne des masks pixel par pixel
+    avg_mask = np.mean(mask_list, axis=0)
+    
+    # Binarisation : si la valeur moyenne est supérieure ou égale au seuil, le pixel devient 255, sinon 0
+    binary_mask = (avg_mask >= 127).astype(np.uint8) * 255
+
+    # Sauvegarder le masque
+    cv2.imwrite(mask_path, binary_mask)
 
 
 if __name__ == "__main__":
@@ -128,6 +144,6 @@ if __name__ == "__main__":
     mask_path = "seg_out/predi_mask.png"
 
     # run classic segmentation
-    watershed_segment(image_path, mask_path)
-    # improve_segmentation(image_path, mask_path)
+    # watershed_segment(image_path, mask_path)
+    improved_segmentation(image_path, mask_path)
     
