@@ -121,10 +121,21 @@ def improve_segmentation(image_path):
     cmpt = 0
     for f in features[0]:
         plt.imsave(f"{features_folder}/features_scattering_{cmpt}.png", f, cmap="viridis")
+
+        #- TODO SEGMENTATION ---------------------------
+        # Appliquer Watershed
+
+        # image_color = cv2.cvtColor(f, cv2.COLOR_BGR2RGB)  # Convertir pour affichage
+        # cv2.watershed(f, markers)
+        # image_color[markers == -1] = [255, 0, 0]  # Contours en rouge
+
+        # # Créer un masque final en noir et blanc
+        # mask = np.zeros_like(image_gray)
+        # mask[markers > 1] = 255  # Tous les pixels marqués comme objets
+        
         cmpt +=1
 
 
-    #- TODO SEGMENTATION ---------------------------
 
 
 if __name__ == "__main__":
