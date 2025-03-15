@@ -9,24 +9,15 @@ from torchvision import transforms
 from kymatio.torch import Scattering2D
 
 
-def classic_segment(image_path):
-    """
-
-    Strat basé sur du watershed pour faire de la segmentatio, un peu dégueu, généré par chatgpt
+def watershed_segment(image_path, mask_path):
+    """Perform watershed segmentation 
         
     """
-
-    # parameters
-    output_dir = "seg_out"
 
     # check si l'image existe
     if not os.path.isfile(image_path):
         print(f"[!] Can't load image from {image_path}")
         return -1
-
-    # check if output folder exist
-    if not os.path.isdir(output_dir):
-        os.mkdir(output_dir)
 
     # Charger l'image
     image = cv2.imread(image_path)
@@ -68,22 +59,10 @@ def classic_segment(image_path):
     mask[markers > 1] = 255  # Tous les pixels marqués comme objets
 
     # Sauvegarder le masque
-    cv2.imwrite(f"{output_dir}/masque_watershed.png", mask)
-
-    # Affichage côte à côte : Image originale vs Masque final
-    fig, axes = plt.subplots(1, 2, figsize=(10, 5))
-    axes[0].imshow(cv2.cvtColor(image, cv2.COLOR_BGR2RGB))
-    axes[0].set_title("Image originale")
-    axes[0].axis("off")
-
-    axes[1].imshow(mask, cmap='gray')
-    axes[1].set_title("Masque de segmentation")
-    axes[1].axis("off")
-
-    plt.show()
+    cv2.imwrite(mask_path, mask)
 
 
-def improve_segmentation(image_path):
+def improved_segmentation(image_path, mask_path):
     """ """
 
     # parameters
@@ -146,8 +125,9 @@ if __name__ == "__main__":
     args = parser.parse_args()
 
     image_path = args.image_path
+    mask_path = "seg_out/predi_mask.png"
 
     # run classic segmentation
-    # classic_segment(image_path)
-    improve_segmentation(image_path)
+    watershed_segment(image_path, mask_path)
+    # improve_segmentation(image_path, mask_path)
     
